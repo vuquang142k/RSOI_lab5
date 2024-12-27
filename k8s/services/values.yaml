@@ -1,0 +1,50 @@
+rental:
+  service:
+    type: ClusterIP
+    port: 8060
+    image: vuquang142k/rental-service-lab5:latest
+    env:     
+      DATA_BASE_PORT: 5432
+      DATA_BASE_NAME: postgres
+      DATA_BASE_USER: postgres
+      DATA_BASE_PASS: postgres
+      DATA_BASE_HOST: postgres
+
+payments:
+  service:
+    type: ClusterIP
+    port: 8050
+    image: vuquang142k/payments-service-lab5:latest
+    env:
+      DATA_BASE_PORT: 5432
+      DATA_BASE_NAME: postgres
+      DATA_BASE_USER: postgres
+      DATA_BASE_PASS: postgres
+      DATA_BASE_HOST: postgres
+
+cars:
+  service:
+    type: ClusterIP
+    port: 8070
+    image: vuquang142k/cars-service-lab5:latest
+    env:
+      DATA_BASE_PORT: 5432
+      DATA_BASE_NAME: postgres
+      DATA_BASE_USER: postgres
+      DATA_BASE_PASS: postgres
+      DATA_BASE_HOST: postgres
+
+gateway:
+   service:
+    type: NodePort
+    port: 8080
+    nodePort: 30000
+    image: vuquang142k/api-gateway-lab5:latest
+    isGateway: true
+    env:
+      CARS_SERVICE_HOST: cars.vuquang142k.svc.cluster.local
+      CARS_SERVICE_PORT: 8070
+      PAYMENT_SERVICE_HOST: payments.vuquang142k.svc.cluster.local
+      PAYMENT_SERVICE_PORT: 8050
+      RENTAL_SERVICE_HOST: rental.vuquang142k.svc.cluster.local
+      RENTAL_SERVICE_PORT: 8060

@@ -1,0 +1,19 @@
+apiVersion: v2
+name: services-chart
+#description: A Helm chart for cars
+type: application
+version: 1.0.0
+#appVersion: "1.16.0"
+dependencies:
+  - name: service-chart
+    version: 1.0.0
+    alias: gateway
+  - name: service-chart
+    version: 1.0.0
+    alias: rental
+  - name: service-chart
+    version: 1.0.0
+    alias: payments
+  - name: service-chart
+    version: 1.0.0
+    alias: cars

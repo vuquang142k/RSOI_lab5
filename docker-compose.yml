@@ -1,0 +1,108 @@
+version: "3"
+services:
+  postgres:
+    image: library/postgres:13
+    container_name: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./postgres/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 15s
+      timeout: 15s
+      retries: 2
+
+  cars-service-lab5:
+    build: auth_app_flask/services/carsService
+    image: vuquang142k/cars-service-lab5
+    container_name: cars-service-lab5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "postgres"
+      DATA_BASE_USER: "postgres"
+      DATA_BASE_PASS: "postgres"
+      DATA_BASE_HOST: "postgres"
+    ports:
+      - "8070:8070"
+    networks:
+      - internal
+
+  payments-service-lab5:
+    build: auth_app_flask/services/paymentService
+    image: vuquang142k/payments-service-lab5
+    container_name: payments-service-lab5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "postgres"
+      DATA_BASE_USER: "postgres"
+      DATA_BASE_PASS: "postgres"
+      DATA_BASE_HOST: "postgres"
+    ports:
+      - "8050:8050"
+    networks:
+      - internal
+
+  rental-service-lab5:
+    build: auth_app_flask/services/rentalService
+    image: vuquang142k/rental-service-lab5
+    container_name: rental-service-lab5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "postgres"
+      DATA_BASE_USER: "postgres"
+      DATA_BASE_PASS: "postgres"
+      DATA_BASE_HOST: "postgres"
+    ports:
+      - "8060:8060"
+    networks:
+      - internal
+
+  api-gateway-lab5:
+    build: auth_app_flask/services/gatewayService
+    image: vuquang142k/api-gateway-lab5
+    container_name: api-gateway-lab5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_BASE_PORT: "5432"
+      DATA_BASE_NAME: "postgres"
+      DATA_BASE_USER: "postgres"
+      DATA_BASE_PASS: "postgres"
+      DATA_BASE_HOST: "postgres"
+      CARS_SERVICE_HOST: "cars-service-lab5"
+      CARS_SERVICE_PORT: "8070"
+      PAYMENT_SERVICE_HOST: "payments-service-lab5"
+      PAYMENT_SERVICE_PORT: "8050"
+      RENTAL_SERVICE_HOST: "rental-service-lab5"
+      RENTAL_SERVICE_PORT: "8060"
+
+    ports:
+      - "8080:8080"
+    networks:
+      - internal
+
+volumes:
+  db-data:
+
+networks:
+  internal:
