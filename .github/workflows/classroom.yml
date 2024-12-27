@@ -21,56 +21,21 @@ jobs:
         timeout-minutes: 10
         run: |
           docker compose build
-      
-      - name: Setup db
-        run: |
-          docker compose up -d postgres
-          docker compose logs postgres
-          sleep 5
-          
-          cd postgres
-          psql "user=postgres hostaddr=127.0.0.1 port=5432 password=postgres" < scripts/db-v3.sql
-          cd ..
-          
-          cd auth_app_flask/scripts_DataBase
-          psql "user=postgres hostaddr=127.0.0.1 port=5432 password=postgres" < create_tables.sql
-          psql "user=postgres hostaddr=127.0.0.1 port=5432 password=postgres" < fill_cars_table.sql
-          cd ..
           
       - name: Run containers
         timeout-minutes: 10
         run: |
-          pip install PyJWT
-          
-          docker compose up -d rental-service-lab5
-          docker compose up -d payments-service-lab5
-          docker compose up -d cars-service-lab5
-          docker compose up -d api-gateway-lab5
-          
-          docker compose logs rental-service-lab5
-          docker compose logs payments-service-lab5
-          docker compose logs cars-service-lab5
-          docker compose logs api-gateway-lab5
-          
-          chmod +x ./scripts/wait-for.sh
-          chmod +x ./scripts/wait-script.sh
+          docker compose up -d
+          sudo chmod +x ./scripts/wait-script.sh
+          sudo chmod +x ./scripts/wait-for.sh
           ./scripts/wait-script.sh
         env:
-          WAIT_PORTS: 8080,8070,8060,8050
+          WAIT_PORTS: 8080,8070,8060,8050,5432
       
       - name: Wait 15s
         uses: jakejarvis/wait-action@master
         with:
           time: '15s'
-          
-      - name: Run API Tests
-        uses: matt-ball/newman-action@master
-        with:
-          TODO insert your variant
-          collection: v3/postman/collection.json
-          environment: v3/postman/environment.json
-          delayRequest: 100
-          reporters: '[ "cli" ]'
           
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -78,50 +43,58 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       
-      - name: Build and publish images
-        timeout-minutes: 15
+      - name: Build docker images
         run: |
-          docker push vuquang142k/api-gateway-lab5
-          docker push vuquang142k/rental-service-lab5
-          docker push vuquang142k/payments-service-lab5
-          docker push vuquang142k/cars-service-lab5
+          docker build ./src/bonus-service/ -t vuquang142k/bonus-service:latest
+          docker build ./src/flight-service/ -t vuquang142k/flight-service:latest
+          docker build ./src/gateway-service/ -t vuquang142k/gateway-service:latest
+          docker build ./src/ticket-service/ -t vuquang142k/ticket-service:latest
       
-      - name: Start Minikube
+      - name: Push the images to Docker Hub
+        run: |
+          docker push vuquang142k/flight-service:latest 
+          docker push vuquang142k/bonus-service:latest
+          docker push vuquang142k/ticket-service:latest
+          docker push vuquang142k/gateway-service:latest
+      
+      - name: Setup Minikube
         uses: medyagh/setup-minikube@master
-      
-      - name: Try the cluster !
+  
+      - name: Check Minikube Cluster
         run: |
           kubectl get pods -A
-
-      - name: Create Namespace
+  
+      - name: Create Namespace in Cluster
         run: |
           kubectl create namespace vuquang142k
-          
+
       - name: Deploy DB and services
         run: |
           kubectl get namespace
-          
           cd k8s
-          echo "------------------Deploy DB------------------"
+          echo "------------------Deploy Postgres DB------------------"
           helm delete postgres --namespace vuquang142k --ignore-not-found
-          helm install -n vuquang142k postgres ./postgres
-          
-          echo "------------------Deploy services------------------"
-          helm delete cars --namespace vuquang142k --ignore-not-found
-          helm install -n vuquang142k cars ./services
-      
-      - name: Wait 60s
+          helm install -n vuquang142k postgres ./postgres_db
+          echo "------------------Deploy Services------------------"
+          helm delete reserv --namespace vuquang142k --ignore-not-found
+          helm install -n vuquang142k reserv ./services
+
+      - name: Wait 30s
         uses: jakejarvis/wait-action@master
         with:
-          time: '60s'
-      
-      - name: All resources from namespace vuquang142k
+          time: '30s'
+      - name: Get all resources from namespace vuquang142k in Cluster
         run: |
           kubectl get all -n vuquang142k
-      
-      - uses: education/autograding@v1
-        id: autograder
-        continue-on-error: true
+          kubectl get services -n vuquang142k
+
+      - name: Setup Ingress
+        run: |
+          cd k8s/networking
+          kubectl apply -f ingress.yaml
+          kubectl get ingress
+          sudo echo "$(minikube ip) myapp.local" | sudo tee -a /etc/hosts
+          URL=$(minikube service flight -n vuquang142k --url)
 
       - name: Stop containers
         if: always()
