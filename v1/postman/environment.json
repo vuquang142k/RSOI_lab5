@@ -3,34 +3,34 @@
 	"name": "[rsoi][lab5] Flight Service",
 	"values": [
 		{
-			"key": "serviceUrl",
-			"value": "",
-			"enabled": true
+		"key": "serviceUrl",
+		"value": "http://localhost:8080",
+		"enabled": true
 		},
 		{
-			"key": "identityProviderUrl",
-			"value": "",
-			"enabled": true
+		"key": "identityProviderUrl",
+		"value": "https://dev-268y6str0e3mrg1n.us.auth0.com",
+		"enabled": true
 		},
 		{
-			"key": "username",
-			"value": "",
-			"enabled": true
+		"key": "username",
+		"value": "user@gmail.com",
+		"enabled": true
 		},
 		{
-			"key": "password",
-			"value": "",
-			"enabled": true
+		"key": "password",
+		"value": "userpass",
+		"enabled": true
 		},
 		{
-			"key": "clientId",
-			"value": "",
-			"enabled": true
+		"key": "clientId",
+		"value": "2tzOe8ODXk00x0wmzA8RoWhSR552QD8f",
+		"enabled": true
 		},
 		{
-			"key": "clientSecret",
-			"value": "",
-			"enabled": true
+		"key": "clientSecret",
+		"value": "YZIJUrFjzqlozGrRLT7eGx3gjrBjGVW1sJ8jcCcwE1wswL4d8rN42QpfwpfPQC6o",
+		"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",

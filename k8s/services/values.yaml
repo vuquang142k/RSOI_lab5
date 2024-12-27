@@ -1,50 +1,53 @@
-rental:
+flight:
   service:
-    type: ClusterIP
-    port: 8060
-    image: vuquang142k/rental-service-lab5:latest
-    env:     
-      DATA_BASE_PORT: 5432
-      DATA_BASE_NAME: postgres
-      DATA_BASE_USER: postgres
-      DATA_BASE_PASS: postgres
-      DATA_BASE_HOST: postgres
-
-payments:
-  service:
-    type: ClusterIP
-    port: 8050
-    image: vuquang142k/payments-service-lab5:latest
-    env:
-      DATA_BASE_PORT: 5432
-      DATA_BASE_NAME: postgres
-      DATA_BASE_USER: postgres
-      DATA_BASE_PASS: postgres
-      DATA_BASE_HOST: postgres
-
-cars:
-  service:
-    type: ClusterIP
+    type: NodePort
     port: 8070
-    image: vuquang142k/cars-service-lab5:latest
+    nodePort: 30070
+    image: vuquang142k/flight-service:latest
     env:
-      DATA_BASE_PORT: 5432
-      DATA_BASE_NAME: postgres
-      DATA_BASE_USER: postgres
-      DATA_BASE_PASS: postgres
-      DATA_BASE_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+
+bonus:
+  service:
+    type: NodePort
+    port: 8060
+    nodePort: 30060
+    image: vuquang142k/bonus-service:latest
+    env:
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+
+ticket:
+  service:
+    type: NodePort
+    port: 8050
+    nodePort: 30050
+    image: vuquang142k/ticket-service:latest
+    env:
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
 
 gateway:
    service:
     type: NodePort
     port: 8080
     nodePort: 30000
-    image: vuquang142k/api-gateway-lab5:latest
+    image: vuquang142k/gateway-service:latest
     isGateway: true
     env:
-      CARS_SERVICE_HOST: cars.vuquang142k.svc.cluster.local
-      CARS_SERVICE_PORT: 8070
-      PAYMENT_SERVICE_HOST: payments.vuquang142k.svc.cluster.local
-      PAYMENT_SERVICE_PORT: 8050
-      RENTAL_SERVICE_HOST: rental.vuquang142k.svc.cluster.local
-      RENTAL_SERVICE_PORT: 8060
+      FLIGHT_SERVICE_HOST: flight.vuquang142k.svc.cluster.local
+      FLIGHT_SERVICE_PORT: 8070
+      BONUS_SERVICE_HOST: bonus.vuquang142k.svc.cluster.local
+      BONUS_SERVICE_PORT: 8060
+      TICKET_SERVICE_HOST: ticket.vuquang142k.svc.cluster.local
+      TICKET_SERVICE_PORT: 8050

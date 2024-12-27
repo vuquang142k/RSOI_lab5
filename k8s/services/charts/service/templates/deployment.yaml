@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - image: {{ .Values.service.image }}
-          env:     
+          env:
             {{ range $name, $value := .Values.service.env }}
             - name: {{ $name }}
               value: {{ $value | quote }}

@@ -12,5 +12,5 @@ pg:
     password: postgres
     db: postgres
   primary:
-    username: program
+    user: program
     password: test
