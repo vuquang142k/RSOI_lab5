@@ -108,6 +108,18 @@ jobs:
             {"key": "clientSecret", "value": "${{ secrets.KC_CLIENT_SECRET }}"}
           ]' > environment.json
 
+      - name: Run API Tests
+        uses: matt-ball/newman-action@master
+        with:
+          collection: v1/postman/collection.json
+          environment: v1/postman/environment.json
+          delayRequest: 100
+          reporters: '[ "cli" ]'
+
+      - uses: education/autograding@v1
+        id: autograder
+        continue-on-error: true
+
       - name: Stop containers
         if: always()
         continue-on-error: true
