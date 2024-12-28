@@ -96,6 +96,18 @@ jobs:
           sudo echo "$(minikube ip) myapp.local" | sudo tee -a /etc/hosts
           URL=$(minikube service flight -n vuquang142k --url)
 
+      - name: Setup Postman environment
+        run: |
+          cd v1/postman
+          echo '[
+            {"key": "serviceUrl", "value": "http://${{ secrets.PROD_HOST }}:${{ secrets.PROD_PORT }}"},
+            {"key": "tokenUrl", "value": "${{ secrets.KC_HOST }}"},
+            {"key": "username", "value": "${{ secrets.KC_USERNAME }}"},
+            {"key": "password", "value": "${{ secrets.KC_PASSWORD }}"},
+            {"key": "clientId", "value": "${{ secrets.KC_CLIENT_ID }}"},
+            {"key": "clientSecret", "value": "${{ secrets.KC_CLIENT_SECRET }}"}
+          ]' > environment.json
+
       - name: Stop containers
         if: always()
         continue-on-error: true
